@@ -27,7 +27,6 @@ const REQUIRED_FIELDS: (keyof TachyonAnswers)[] = [
 
 export async function POST(req: NextRequest) {
   // ── Auth gate ──────────────────────────────────────────
-  let userId = "anonymous";
   if (process.env.AUTH0_SECRET) {
     const session = await auth0.getSession();
     if (!session) {
@@ -36,7 +35,6 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
-    userId = session.user.sub;
   }
 
   // ── Parse & validate body ──────────────────────────────
