@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #00ff41;
+  --green-dim: #1a5c2a;
+  --green-mid: #00a329;
+  --green-dark: #0d2b14;
+  --green-faint: #061409;
+  --bg: #000509;
+  --amber: #ffb700;
+  --red: #ff4444;
+  --text: #a8e6b4;
+  --mono: 'Share Tech Mono', monospace;
+  --vt: 'VT323', monospace;
+}
+
+@keyframes blink      { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes glowPulse  {
+  0%,100%{ text-shadow: 0 0 8px var(--green), 0 0 24px var(--green), 0 0 60px rgba(0,255,65,.25); }
+  50%    { text-shadow: 0 0 4px var(--green), 0 0 12px var(--green); }
+}
+@keyframes fadeUp     { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes sweepDown  { 0%{top:-80px;opacity:.4} 100%{top:100vh;opacity:0} }
+@keyframes flicker    { 0%,93%,95%,100%{opacity:1} 94%{opacity:.82} }
+@keyframes slideIn    { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pulseDot   { 0%,100%{opacity:1} 50%{opacity:.2} }
+@keyframes fillBar    { from{width:0} }
+
+.tx-root {
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--green);
+  font-family: var(--mono);
+  position: relative;
+  overflow-x: hidden;
+  animation: flicker 12s infinite;
+}
+
+/* Overlay effects */
+.tx-scanlines {
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,.13) 2px, rgba(0,0,0,.13) 4px
+  );
+  pointer-events: none; z-index: 900;
+}
+.tx-vignette {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.6) 100%);
+  pointer-events: none; z-index: 901;
+}
+.tx-sweep {
+  position: fixed; left: 0; right: 0; height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(0,255,65,.05), transparent);
+  animation: sweepDown 10s linear infinite;
+  pointer-events: none; z-index: 899;
+}
+
+/* Layout */
+.tx-screen {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 48px 24px;
+  position: relative; z-index: 1;
+}
+.tx-screen.top { justify-content: flex-start; padding-top: 40px; }
+
+/* Typography */
+.vt { font-family: var(--vt); }
+.tx-logo {
+  font-family: var(--vt);
+  font-size: clamp(72px, 14vw, 148px);
+  color: var(--green); letter-spacing: .22em; line-height: 1;
+  animation: glowPulse 3.5s ease-in-out infinite;
+}
+
+/* Buttons */
+.tx-btn {
+  background: transparent; border: 1px solid var(--green);
+  color: var(--green); font-family: var(--mono);
+  font-size: 11px; letter-spacing: .25em;
+  padding: 13px 36px; cursor: pointer;
+  transition: all .2s; text-transform: uppercase;
+}
+.tx-btn:hover {
+  background: rgba(0,255,65,.07);
+  box-shadow: 0 0 28px rgba(0,255,65,.22), inset 0 0 12px rgba(0,255,65,.05);
+}
+.tx-btn:active { opacity: .7; }
+.tx-btn:disabled { opacity: .28; cursor: not-allowed; }
+.tx-btn.amber { border-color: var(--amber); color: var(--amber); }
+.tx-btn.amber:hover { background: rgba(255,183,0,.07); box-shadow: 0 0 28px rgba(255,183,0,.2); }
+.tx-btn.sm {
+  background: none; border: none;
+  color: var(--green-dark); font-family: var(--mono);
+  font-size: 10px; letter-spacing: .12em; cursor: pointer;
+  transition: color .2s;
+}
+.tx-btn.sm:hover { color: var(--green-dim); }
+
+/* Form inputs */
+.tx-input {
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--green-dim);
+  color: var(--green); font-family: var(--mono);
+  font-size: 20px; padding: 10px 0;
+  outline: none; width: 100%; max-width: 440px; text-align: center;
+  transition: border-color .2s;
+}
+.tx-input::placeholder { color: var(--green-dark); }
+.tx-input:focus { border-bottom-color: var(--green-mid); }
+.tx-input[type=number] { max-width: 140px; }
+
+.tx-textarea {
+  background: rgba(0,255,65,.02); border: 1px solid var(--green-dark);
+  color: var(--green); font-family: var(--mono);
+  font-size: 13px; padding: 16px; outline: none;
+  resize: none; height: 110px; line-height: 1.8;
+  width: 100%; max-width: 540px;
+  transition: border-color .2s;
+}
+.tx-textarea::placeholder { color: var(--green-dark); }
+.tx-textarea:focus { border-color: var(--green-dim); }
+
+/* Choice grid */
+.tx-choices { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; max-width: 540px; width: 100%; }
+.tx-opt {
+  background: transparent; border: 1px solid var(--green-dark);
+  color: var(--green-dark); font-family: var(--mono);
+  font-size: 11px; padding: 14px 12px; cursor: pointer;
+  text-align: left; transition: all .15s; letter-spacing: .04em;
+  line-height: 1.5;
+}
+.tx-opt:hover, .tx-opt.sel {
+  border-color: var(--green); color: var(--green);
+  background: rgba(0,255,65,.04);
+  box-shadow: inset 0 0 8px rgba(0,255,65,.04);
+}
+
+/* Progress */
+.tx-steps { display: flex; gap: 5px; margin-bottom: 36px; }
+.tx-step { height: 2px; flex: 1; background: var(--green-dark); transition: background .3s; }
+.tx-step.act { background: var(--green); }
+
+.tx-progress-track {
+  border: 1px solid var(--green-dark); height: 18px;
+  position: relative; overflow: hidden; width: 100%;
+}
+.tx-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-faint), #003b11, var(--green));
+  transition: width .12s linear; position: relative;
+}
+.tx-progress-fill::after {
+  content: ''; position: absolute; right: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--green);
+  box-shadow: 0 0 10px var(--green), 0 0 20px rgba(0,255,65,.4);
+}
+
+/* Terminal box */
+.tx-terminal {
+  border: 1px solid var(--green-dark);
+  width: 100%; padding: 28px 32px;
+  position: relative;
+}
+.tx-terminal::before {
+  content: ''; position: absolute;
+  top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green-dim), transparent);
+  opacity: .4;
+}
+
+/* Meta rows */
+.tx-meta-row {
+  display: flex; gap: 10px; margin: 4px 0;
+  font-size: 12px; letter-spacing: .04em;
+  animation: fadeUp .35s ease forwards; opacity: 0;
+}
+.tx-meta-key { color: var(--green-dim); min-width: 108px; flex-shrink: 0; }
+.tx-meta-colon { color: var(--green-dark); }
+
+/* Separator */
+.tx-sep { border: none; border-top: 1px solid var(--green-dark); margin: 14px 0; }
+
+/* Cursor */
+.tx-cursor {
+  display: inline-block; width: 8px; height: 15px;
+  background: var(--green); margin-left: 2px;
+  vertical-align: middle; animation: blink 1s step-end infinite;
+}
+
+/* Transmission text */
+.tx-text {
+  font-size: 13px; line-height: 2.0; color: var(--text);
+  min-height: 220px; letter-spacing: .03em;
+  cursor: pointer;
+}
+
+/* Path badge */
+.tx-badge {
+  font-size: 9px; letter-spacing: .2em; padding: 4px 12px;
+  border: 1px solid; display: inline-block;
+  margin-bottom: 8px; font-family: var(--mono);
+}
+
+/* Transmission index dots */
+.tx-dots { display: flex; gap: 8px; align-items: center; margin-top: 20px; }
+.tx-dot { width: 28px; height: 2px; transition: background .3s; }
+
+/* Logs */
+.tx-log {
+  font-size: 10px; letter-spacing: .06em; margin-bottom: 4px;
+  animation: slideIn .3s ease forwards;
+}
+
+/* Share card */
+.tx-card {
+  border: 1px solid;
+  background: var(--bg);
+  padding: 28px;
+  position: relative;
+}
+.tx-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+}
+
+/* Tabs */
+.tx-tab {
+  background: none; border: 1px solid var(--green-dark);
+  color: var(--green-dark); font-family: var(--mono);
+  font-size: 9px; letter-spacing: .15em;
+  padding: 7px 14px; cursor: pointer; transition: all .2s;
+}
+.tx-tab.act { border-color: var(--green); color: var(--green); }
+
+/* Pull quote */
+.tx-quote {
+  font-family: var(--vt);
+  font-size: clamp(22px, 4vw, 32px);
+  color: var(--green); line-height: 1.35;
+  text-align: center; padding: 16px 8px;
+}
+
+/* Pulsing dot */
+.tx-pulse { animation: pulseDot 1.4s ease-in-out infinite; }
+
+/* Scrollable */
+.tx-scroll { overflow-y: auto; max-height: 300px; }
+.tx-scroll::-webkit-scrollbar { width: 4px; }
+.tx-scroll::-webkit-scrollbar-track { background: var(--green-dark); }
+.tx-scroll::-webkit-scrollbar-thumb { background: var(--green-dim); }
