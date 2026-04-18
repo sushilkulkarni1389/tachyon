@@ -1,6 +1,10 @@
 "use client";
 
+import { useUser } from "@auth0/nextjs-auth0/client";
+
 export default function IntroScreen({ onStart }: { onStart: () => void }) {
+  const { user, isLoading } = useUser();
+
   return (
     <div className="tx-screen" style={{ textAlign: "center", gap: 0 }}>
       <div style={{ color: "var(--green-dark)", fontSize: 10, letterSpacing: ".35em", marginBottom: 32 }}>
@@ -24,9 +28,32 @@ export default function IntroScreen({ onStart }: { onStart: () => void }) {
         THREE POSSIBLE FUTURES. ONE IS YOURS.
       </div>
 
-      <button className="tx-btn" onClick={onStart} style={{ marginTop: 52 }}>
-        ▶ INITIATE SEQUENCE
-      </button>
+      {/* Auth state */}
+      {!isLoading && (
+        <div style={{ marginTop: 52, display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          {user ? (
+            <>
+              <button className="tx-btn" onClick={onStart}>
+                ▶ INITIATE SEQUENCE
+              </button>
+              <div style={{ fontSize: 9, letterSpacing: ".08em", color: "var(--green-dim)" }}>
+                OPERATOR: {(user.email || user.name || user.sub)?.toUpperCase()}
+                &nbsp;&nbsp;·&nbsp;&nbsp;
+                <a
+                  href="/auth/logout"
+                  style={{ color: "var(--green-dark)", textDecoration: "none", borderBottom: "1px solid var(--green-dark)" }}
+                >
+                  DISCONNECT
+                </a>
+              </div>
+            </>
+          ) : (
+            <a href="/auth/login" className="tx-btn amber" style={{ textDecoration: "none" }}>
+              ▶ LOGIN TO TRANSMIT
+            </a>
+          )}
+        </div>
+      )}
 
       <div style={{ color: "var(--green-faint)", fontSize: 9, letterSpacing: ".12em", marginTop: 64 }}>
         EARTH DAY 2026 · TACHYON RESEARCH COLLECTIVE
@@ -37,10 +64,10 @@ export default function IntroScreen({ onStart }: { onStart: () => void }) {
         ◄ TCH-2450-B
       </div>
       <div style={{ position: "fixed", top: 20, right: 20, color: "var(--green-dark)", fontSize: 10, letterSpacing: ".1em" }}>
-        ACTIVE ►
+        {user ? "AUTHENTICATED ►" : "ACTIVE ►"}
       </div>
       <div style={{ position: "fixed", bottom: 20, left: 20, color: "var(--green-dark)", fontSize: 9 }}>
-        <span className="tx-pulse">●</span> STANDING BY
+        <span className="tx-pulse">●</span> {user ? "OPERATOR LINKED" : "STANDING BY"}
       </div>
     </div>
   );

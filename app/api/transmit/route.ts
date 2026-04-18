@@ -60,41 +60,51 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Call Gemini ────────────────────────────────────────
-  try {
-    const geminiResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: buildUserPrompt(answers),
-      config: {
-        systemInstruction: buildSystemPrompt(),
-        responseMimeType: "application/json",
-        temperature: 0.9,
-        maxOutputTokens: 4096,
-      },
-    });
+  // ── Call Gemini (with fallback model) ───────────────────
+  const models = ["gemini-2.5-flash", "gemini-3-flash-preview"];
+  const config = {
+    systemInstruction: buildSystemPrompt(),
+    responseMimeType: "application/json" as const,
+    temperature: 0.9,
+    maxOutputTokens: 8192,
+  };
+  const contents = buildUserPrompt(answers);
 
-    const raw = geminiResponse.text;
-    if (!raw) throw new Error("Empty response from Gemini");
-    const result = JSON.parse(raw) as TachyonResponse;
+  let lastError: unknown;
+  for (const model of models) {
+    try {
+      console.log(`[transmit] Trying model: ${model}`);
+      const geminiResponse = await ai.models.generateContent({
+        model,
+        contents,
+        config,
+      });
 
-    if (
-      !result.transmissions ||
-      !Array.isArray(result.transmissions) ||
-      result.transmissions.length !== 3
-    ) {
-      return NextResponse.json(
-        { error: "Gemini response missing 3 transmissions", raw: result },
-        { status: 502 }
-      );
+      const raw = geminiResponse.text;
+      if (!raw) throw new Error("Empty response from Gemini");
+      const result = JSON.parse(raw) as TachyonResponse;
+
+      if (
+        !result.transmissions ||
+        !Array.isArray(result.transmissions) ||
+        result.transmissions.length !== 3
+      ) {
+        return NextResponse.json(
+          { error: "Gemini response missing 3 transmissions", raw: result },
+          { status: 502 }
+        );
+      }
+
+      return NextResponse.json(result);
+    } catch (err: unknown) {
+      lastError = err;
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[transmit] ${model} failed:`, message);
+      // Try next model
     }
-
-    return NextResponse.json(result);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : '';
-    console.error('[transmit] Gemini error message:', message);
-    console.error('[transmit] Gemini error stack:', stack);
-    console.error('[transmit] Gemini error raw:', err);
-    return NextResponse.json({ error: 'Gemini call failed', detail: message }, { status: 502 });
   }
+
+  const message = lastError instanceof Error ? lastError.message : String(lastError);
+  console.error('[transmit] All models failed. Last error:', message);
+  return NextResponse.json({ error: 'Gemini call failed', detail: message }, { status: 502 });
 }
